@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Manager Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <h2>Manager Dashboard</h2>
+
+    <div class="dashboard-grid">
+        <div class="dashboard-section">
+            <h3>Create Project</h3>
+            <form id="create-project-form">
+                <div class="form-group">
+                    <label for="project-name">Name</label>
+                    <input type="text" id="project-name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="project-description">Description</label>
+                    <textarea id="project-description" name="description"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Project</button>
+            </form>
+        </div>
+
+        <div class="dashboard-section">
+            <h3>Create Task</h3>
+            <form id="create-task-form">
+                <div class="form-group">
+                    <label for="task-title">Title</label>
+                    <input type="text" id="task-title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="task-description">Description</label>
+                    <textarea id="task-description" name="description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="task-project">Project</label>
+                    <select id="task-project" name="project_id" required>
+                        {% for project in projects %}
+                        <option value="{{ project['id'] }}">{{ project['name'] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="task-assignee">Assign to</label>
+                    <select id="task-assignee" name="assigned_to" required>
+                        {% for worker in workers %}
+                        <option value="{{ worker['id'] }}">{{ worker['username'] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Task</button>
+            </form>
+        </div>
+
+        <div class="dashboard-section">
+            <h3>Create Subtask</h3>
+            <form id="create-subtask-form">
+                <div class="form-group">
+                    <label for="subtask-title">Title</label>
+                    <input type="text" id="subtask-title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="subtask-description">Description</label>
+                    <textarea id="subtask-description" name="description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="subtask-task">Parent Task</label>
+                    <select id="subtask-task" name="task_id" required>
+                        {% for task in tasks %}
+                        <option value="{{ task['id'] }}">{{ task['title'] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="subtask-assignee">Assign to</label>
+                    <select id="subtask-assignee" name="assigned_to" required>
+                        {% for worker in workers %}
+                        <option value="{{ worker['id'] }}">{{ worker['username'] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Subtask</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Обработка создания проекта
+    document.getElementById('create-project-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        fetch('/api/create_project', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Project created successfully');
+                location.reload();
+            } else {
+                alert('Error creating project: ' + data.message);
+            }
+        });
+    });
+
+    // Обработка создания задачи
+    document.getElementById('create-task-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        fetch('/api/create_task', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Task created successfully');
+                location.reload();
+            } else {
+                alert('Error creating task: ' + data.message);
+            }
+        });
+    });
+
+    // Обработка создания подзадачи
+    document.getElementById('create-subtask-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        fetch('/api/create_subtask', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Subtask created successfully');
+                location.reload();
+            } else {
+                alert('Error creating subtask: ' + data.message);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

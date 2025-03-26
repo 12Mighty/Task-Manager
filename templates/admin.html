@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <h2>Admin Dashboard</h2>
+
+    <div class="dashboard-section">
+        <h3>User Management</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user['id'] }}</td>
+                    <td>{{ user['username'] }}</td>
+                    <td>{{ user['role'] }}</td>
+                    <td>
+                        <select class="role-select" data-user-id="{{ user['id'] }}">
+                            <option value="admin" {% if user['role'] == 'admin' %}selected{% endif %}>Admin</option>
+                            <option value="manager" {% if user['role'] == 'manager' %}selected{% endif %}>Manager</option>
+                            <option value="worker" {% if user['role'] == 'worker' %}selected{% endif %}>Worker</option>
+                        </select>
+                        <button class="btn btn-sm btn-update-role" data-user-id="{{ user['id'] }}">Update</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="dashboard-section">
+        <h3>Recent Activity</h3>
+        <div class="activity-log">
+            {% for log in logs %}
+            <div class="log-entry">
+                <span class="log-time">{{ log['timestamp'] }}</span>
+                <span class="log-user">{{ log['username'] }}</span>
+                <span class="log-action">{{ log['action'] }}</span>
+                <span class="log-details">{{ log['details'] }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Обработка изменения роли пользователя
+    document.querySelectorAll('.btn-update-role').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            const select = document.querySelector(`.role-select[data-user-id="${userId}"]`);
+            const newRole = select.value;
+
+            fetch('/api/change_role', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `user_id=${userId}&new_role=${newRole}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Role updated successfully');
+                    location.reload();
+                } else {
+                    alert('Error updating role: ' + data.message);
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}
