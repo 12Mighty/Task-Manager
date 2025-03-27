@@ -3,84 +3,89 @@
 {% block title %}Manager Dashboard{% endblock %}
 
 {% block content %}
-<div class="dashboard">
-    <h2>Manager Dashboard</h2>
+<div class="container mt-4">
+    <h2 class="mb-4">Manager Dashboard</h2>
+    <div id="loading-indicator" class="text-center mb-3" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
 
-    <div class="dashboard-grid">
-        <div class="dashboard-section">
-            <h3>Create Project</h3>
+    <!-- Projects Section -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5>Create New Project</h5>
+        </div>
+        <div class="card-body">
             <form id="create-project-form">
-                <div class="form-group">
-                    <label for="project-name">Name</label>
-                    <input type="text" id="project-name" name="name" required>
+                <div class="mb-3">
+                    <label for="project-name" class="form-label">Project Name*</label>
+                    <input type="text" class="form-control" id="project-name" name="name" required>
                 </div>
-                <div class="form-group">
-                    <label for="project-description">Description</label>
-                    <textarea id="project-description" name="description"></textarea>
+                <div class="mb-3">
+                    <label for="project-description" class="form-label">Description</label>
+                    <textarea class="form-control" id="project-description" name="description" rows="2"></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">Create Project</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Create Project
+                </button>
             </form>
         </div>
+    </div>
 
-        <div class="dashboard-section">
-            <h3>Create Task</h3>
+    <!-- Projects List -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5>Your Projects</h5>
+            <button id="refresh-projects" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-sync"></i> Refresh
+            </button>
+        </div>
+        <div class="card-body">
+            <div id="projects-list">
+                <div class="text-center text-muted">Loading projects...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Creation -->
+    <div class="card">
+        <div class="card-header">
+            <h5>Create New Task</h5>
+        </div>
+        <div class="card-body">
             <form id="create-task-form">
-                <div class="form-group">
-                    <label for="task-title">Title</label>
-                    <input type="text" id="task-title" name="title" required>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="task-title" class="form-label">Task Title*</label>
+                        <input type="text" class="form-control" id="task-title" name="title" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="task-project" class="form-label">Project*</label>
+                        <select class="form-select" id="task-project" name="project_id" required>
+                            <option value="" disabled selected>Loading projects...</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="task-description">Description</label>
-                    <textarea id="task-description" name="description"></textarea>
+                <div class="mb-3">
+                    <label for="task-description" class="form-label">Description</label>
+                    <textarea class="form-control" id="task-description" name="description" rows="2"></textarea>
                 </div>
-                <div class="form-group">
-                    <label for="task-project">Project</label>
-                    <select id="task-project" name="project_id" required>
-                        {% for project in projects %}
-                        <option value="{{ project['id'] }}">{{ project['name'] }}</option>
-                        {% endfor %}
-                    </select>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="task-assignee" class="form-label">Assign to Worker*</label>
+                        <select class="form-select" id="task-assignee" name="assigned_to" required>
+                            <option value="" disabled selected>Loading workers...</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Status</label>
+                        <div class="form-control bg-light">Pending</div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="task-assignee">Assign to</label>
-                    <select id="task-assignee" name="assigned_to" required>
-                        {% for worker in workers %}
-                        <option value="{{ worker['id'] }}">{{ worker['username'] }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Create Task</button>
-            </form>
-        </div>
-
-        <div class="dashboard-section">
-            <h3>Create Subtask</h3>
-            <form id="create-subtask-form">
-                <div class="form-group">
-                    <label for="subtask-title">Title</label>
-                    <input type="text" id="subtask-title" name="title" required>
-                </div>
-                <div class="form-group">
-                    <label for="subtask-description">Description</label>
-                    <textarea id="subtask-description" name="description"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="subtask-task">Parent Task</label>
-                    <select id="subtask-task" name="task_id" required>
-                        {% for task in tasks %}
-                        <option value="{{ task['id'] }}">{{ task['title'] }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="subtask-assignee">Assign to</label>
-                    <select id="subtask-assignee" name="assigned_to" required>
-                        {% for worker in workers %}
-                        <option value="{{ worker['id'] }}">{{ worker['username'] }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Create Subtask</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-tasks"></i> Create Task
+                </button>
             </form>
         </div>
     </div>
@@ -88,68 +93,136 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Обработка создания проекта
-    document.getElementById('create-project-form').addEventListener('submit', function(e) {
+    // Load initial data
+    loadInitialData();
+
+    // Refresh projects button
+    document.getElementById('refresh-projects').addEventListener('click', function() {
+        loadWithIndicator(refreshProjects);
+    });
+
+    // Project form submission
+    document.getElementById('create-project-form').addEventListener('submit', async function(e) {
         e.preventDefault();
+        await loadWithIndicator(async () => {
+            try {
+                const formData = new FormData(this);
+                const response = await fetch('/manager/create_project', {
+                    method: 'POST',
+                    body: formData
+                });
 
-        const formData = new FormData(this);
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Failed to create project');
+                }
 
-        fetch('/api/create_project', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                alert('Project created successfully');
-                location.reload();
-            } else {
-                alert('Error creating project: ' + data.message);
+                alert('Project created successfully!');
+                this.reset();
+                await refreshProjects();
+            } catch (error) {
+                alert('Error: ' + error.message);
             }
         });
     });
 
-    // Обработка создания задачи
-    document.getElementById('create-task-form').addEventListener('submit', function(e) {
+    // Task form submission
+    document.getElementById('create-task-form').addEventListener('submit', async function(e) {
         e.preventDefault();
+        await loadWithIndicator(async () => {
+            try {
+                const formData = new FormData(this);
+                const response = await fetch('/manager/create_task', {
+                    method: 'POST',
+                    body: formData
+                });
 
-        const formData = new FormData(this);
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Failed to create task');
+                }
 
-        fetch('/api/create_task', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                alert('Task created successfully');
-                location.reload();
-            } else {
-                alert('Error creating task: ' + data.message);
+                alert('Task created successfully!');
+                this.reset();
+            } catch (error) {
+                alert('Error: ' + error.message);
             }
         });
     });
 
-    // Обработка создания подзадачи
-    document.getElementById('create-subtask-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        const formData = new FormData(this);
-
-        fetch('/api/create_subtask', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                alert('Subtask created successfully');
-                location.reload();
-            } else {
-                alert('Error creating subtask: ' + data.message);
-            }
+    // Helper functions
+    async function loadInitialData() {
+        await loadWithIndicator(async () => {
+            await Promise.all([refreshProjects(), refreshWorkers()]);
         });
-    });
+    }
+
+    async function refreshProjects() {
+        try {
+            const response = await fetch('/manager/get_projects');
+            if (!response.ok) throw new Error('Failed to load projects');
+            const html = await response.text();
+            document.getElementById('projects-list').innerHTML = html;
+
+            // Refresh projects select
+            const selectResponse = await fetch('/manager/get_projects_select');
+            if (!selectResponse.ok) throw new Error('Failed to load projects');
+            const projects = await selectResponse.json();
+            const select = document.getElementById('task-project');
+            select.innerHTML = projects.map(p =>
+                `<option value="${p.id}">${p.name}</option>`
+            ).join('');
+        } catch (error) {
+            document.getElementById('projects-list').innerHTML = `
+                <div class="alert alert-danger">Error loading projects: ${error.message}</div>
+            `;
+        }
+    }
+
+    async function refreshWorkers() {
+        try {
+            const response = await fetch('/manager/get_workers');
+            if (!response.ok) throw new Error('Failed to load workers');
+            const workers = await response.json();
+            const select = document.getElementById('task-assignee');
+            select.innerHTML = workers.map(w =>
+                `<option value="${w.id}">${w.username}</option>`
+            ).join('');
+        } catch (error) {
+            console.error("Worker load error:", error);
+        }
+    }
+
+    async function loadWithIndicator(loaderFunc) {
+        const loader = document.getElementById('loading-indicator');
+        loader.style.display = 'block';
+        try {
+            await loaderFunc();
+        } catch (error) {
+            console.error("Loading error:", error);
+        } finally {
+            loader.style.display = 'none';
+        }
+    }
 });
 </script>
+
+<style>
+.card {
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #eee;
+    font-weight: 500;
+}
+.form-control, .form-select {
+    border-radius: 4px;
+}
+.table {
+    margin-bottom: 0;
+}
+</style>
 {% endblock %}
