@@ -6,35 +6,16 @@
 <div class="dashboard">
     <h2>Admin Dashboard</h2>
 
+    <!-- Добавим кнопку для обновления списка -->
+    <button id="refresh-users" class="btn btn-secondary mb-3">
+        <i class="fas fa-sync-alt"></i> Refresh Users
+    </button>
+
     <div class="dashboard-section">
         <h3>User Management</h3>
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>Role</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in users %}
-                <tr>
-                    <td>{{ user['id'] }}</td>
-                    <td>{{ user['username'] }}</td>
-                    <td>{{ user['role'] }}</td>
-                    <td>
-                        <select class="role-select" data-user-id="{{ user['id'] }}">
-                            <option value="admin" {% if user['role'] == 'admin' %}selected{% endif %}>Admin</option>
-                            <option value="manager" {% if user['role'] == 'manager' %}selected{% endif %}>Manager</option>
-                            <option value="worker" {% if user['role'] == 'worker' %}selected{% endif %}>Worker</option>
-                        </select>
-                        <button class="btn btn-sm btn-update-role" data-user-id="{{ user['id'] }}">Update</button>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div id="users-table-container">
+            {% include '_users_table.html' %}
+        </div>
     </div>
 
     <div class="dashboard-section">
@@ -42,11 +23,13 @@
         <div class="activity-log">
             {% for log in logs %}
             <div class="log-entry">
-                <span class="log-time">{{ log['timestamp'] }}</span>
-                <span class="log-user">{{ log['username'] }}</span>
-                <span class="log-action">{{ log['action'] }}</span>
-                <span class="log-details">{{ log['details'] }}</span>
+                <span class="log-time">{{ log.timestamp|datetimeformat }}</span>
+                <span class="log-user">{{ log.username }}</span>
+                <span class="log-action">{{ log.action }}</span>
+                <span class="log-details">{{ log.details }}</span>
             </div>
+            {% else %}
+            <p>No activity logs found</p>
             {% endfor %}
         </div>
     </div>
@@ -54,30 +37,54 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Обработка изменения роли пользователя
-    document.querySelectorAll('.btn-update-role').forEach(button => {
-        button.addEventListener('click', function() {
-            const userId = this.getAttribute('data-user-id');
-            const select = document.querySelector(`.role-select[data-user-id="${userId}"]`);
+    // Функция для обновления таблицы пользователей
+    async function refreshUsers() {
+        try {
+            const response = await fetch('/admin/get_users');
+            if (!response.ok) throw new Error('Network error');
+            const html = await response.text();
+            document.getElementById('users-table-container').innerHTML = html;
+        } catch (error) {
+            alert('Error refreshing users: ' + error.message);
+        }
+    }
+
+    // Обработчик кнопки обновления
+    document.getElementById('refresh-users').addEventListener('click', refreshUsers);
+
+    // Обработка изменения роли (делегирование событий)
+    document.addEventListener('click', async function(e) {
+        if (e.target.classList.contains('btn-update-role')) {
+            const row = e.target.closest('tr');
+            const userId = e.target.dataset.userId;
+            const select = row.querySelector('.role-select');
             const newRole = select.value;
 
-            fetch('/api/change_role', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `user_id=${userId}&new_role=${newRole}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    alert('Role updated successfully');
-                    location.reload();
-                } else {
-                    alert('Error updating role: ' + data.message);
-                }
-            });
-        });
+            try {
+                const response = await fetch('/admin/change_role', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        new_role: newRole
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.message || 'Error updating role');
+
+                alert('Role updated successfully!');
+                await refreshUsers(); // Обновляем таблицу
+            } catch (error) {
+                alert('Error: ' + error.message);
+                // Восстанавливаем предыдущее значение
+                const currentRole = row.querySelector('.current-role').textContent;
+                select.value = currentRole.toLowerCase();
+            }
+        }
     });
 });
 </script>

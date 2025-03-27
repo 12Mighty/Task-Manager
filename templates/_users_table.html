@@ -1,0 +1,36 @@
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Current Role</th>
+            <th>Change Role</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.username }}</td>
+            <td class="current-role">{{ user.role }}</td>
+            <td>
+                <select class="form-select role-select">
+                    <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                    <option value="manager" {% if user.role == 'manager' %}selected{% endif %}>Manager</option>
+                    <option value="worker" {% if user.role == 'worker' %}selected{% endif %}>Worker</option>
+                </select>
+            </td>
+            <td>
+                <button class="btn btn-primary btn-sm btn-update-role" data-user-id="{{ user.id }}">
+                    <i class="fas fa-save"></i> Update
+                </button>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="5">No users found</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -5,11 +5,19 @@ import click
 import os
 from datetime import datetime
 
+def format_datetime(value, format='%Y-%m-%d %H:%M:%S'):
+    if value is None:
+        return ''
+    if isinstance(value, str):
+        value = datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
+    return value.strftime(format)
+
 # Конфигурация приложения
 app = Flask(__name__)
 app.secret_key = 'your-secret-key'
 app.config['DATABASE'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance', 'task_manager.db')
 app.config['INSTANCE_PATH'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance')
+app.jinja_env.filters['datetimeformat'] = format_datetime
 
 # Создаем папку instance если ее нет
 os.makedirs(app.config['INSTANCE_PATH'], exist_ok=True)
@@ -223,6 +231,50 @@ def complete_task(task_id):
     db.commit()
     log_action(session['user_id'], 'task_completed', f'Task {task_id} completed')
     return jsonify({'success': True})
+
+@app.route('/admin/get_users')
+def get_users_table():
+    db = get_db()
+    users = db.execute('SELECT * FROM users ORDER BY id').fetchall()
+    return render_template('_users_table.html', users=users)
+
+@app.route('/admin/change_role', methods=['POST'])
+def change_role():
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 403
+
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'message': 'Invalid JSON'}), 400
+
+    user_id = data.get('user_id')
+    new_role = data.get('new_role')
+
+    if not user_id or not new_role or new_role not in ['admin', 'manager', 'worker']:
+        return jsonify({'success': False, 'message': 'Invalid parameters'}), 400
+
+    try:
+        db = get_db()
+
+        # Проверяем существование пользователя
+        user = db.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
+        if not user:
+            return jsonify({'success': False, 'message': 'User not found'}), 404
+
+        # Обновляем роль
+        db.execute('UPDATE users SET role = ? WHERE id = ?', (new_role, user_id))
+        db.commit()
+
+        # Логируем действие
+        log_action(
+            session['user_id'],
+            'role_change',
+            f"Changed role for {user['username']} from {user['role']} to {new_role}"
+        )
+
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 # Инициализация приложения
 if __name__ == '__main__':
