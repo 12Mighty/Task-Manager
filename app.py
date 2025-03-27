@@ -27,6 +27,7 @@ def close_db(e=None):
     if db is not None:
         db.close()
 
+
 def init_db():
     """Инициализирует только структуру БД без тестовых пользователей"""
     with app.app_context():
@@ -34,6 +35,7 @@ def init_db():
         with app.open_resource('schema.sql') as f:
             db.executescript(f.read().decode('utf8'))
 
+        # Проверяем наличие администратора
         admin_exists = db.execute(
             "SELECT 1 FROM users WHERE role = 'admin'"
         ).fetchone()
@@ -45,6 +47,9 @@ def init_db():
             )
             db.commit()
             print("Создан администратор по умолчанию: admin/admin123")
+
+        # Явно закрываем соединение
+        close_db()
 
 @click.command('init-db')
 def init_db_command():
@@ -67,7 +72,9 @@ def register_user(username, password, role='worker'):
 
 def login_user(username, password):
     db = get_db()
+    # Регистронезависимый поиск
     user = db.execute(
+        'SELECT * FROM users WHERE username COLLATE NOCASE = ?', (username,)
     ).fetchone()
     if user and check_password_hash(user['password'], password):
         return dict(user)
@@ -188,6 +195,7 @@ def logout():
 # ================== ПАНЕЛИ ==================
 def admin_dashboard():
     db = get_db()
+    users = db.execute('SELECT id, username, role FROM users WHERE role = "admin"').fetchall()
     logs = db.execute('SELECT * FROM logs ORDER BY timestamp DESC LIMIT 10').fetchall()
     return render_template('admin.html', users=users, logs=logs)
 
