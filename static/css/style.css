@@ -375,6 +375,28 @@ footer {
     font-size: 14px;
 }
 
+.actions {
+    white-space: nowrap;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 5px;
+}
+
+.action-btn:last-child {
+    margin-right: 0;
+}
+
+.action-btn i {
+    font-size: 14px;
+}
+
 @media (max-width: 768px) {
     .dashboard-grid {
         grid-template-columns: 1fr;

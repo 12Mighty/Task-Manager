@@ -84,7 +84,56 @@ document.addEventListener('DOMContentLoaded', function() {
                 const currentRole = row.querySelector('.current-role').textContent;
                 select.value = currentRole.toLowerCase();
             }
+
         }
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Делегирование событий для динамически добавляемых элементов
+    document.getElementById('users-table-container').addEventListener('click', function(e) {
+        // Обработка удаления пользователя
+        if (e.target.closest('.delete-user')) {
+            const button = e.target.closest('.delete-user');
+            const userId = button.dataset.userId;
+
+            if (confirm('Are you sure you want to delete this user?')) {
+                fetch(`/delete_user/${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Обновляем таблицу после удаления
+                        document.getElementById('refresh-users').click();
+                    } else {
+                        alert('Error: ' + (data.error || 'Failed to delete user'));
+                    }
+                })
+                .catch(error => {
+                    alert('Error: ' + error.message);
+                });
+            }
+        }
+
+        // Обработка обновления пользователя (если есть)
+        if (e.target.closest('.update-user')) {
+            const button = e.target.closest('.update-user');
+            const userId = button.dataset.userId;
+            // Ваш код для обновления пользователя
+        }
+    });
+
+    // Обработка обновления списка пользователей
+    document.getElementById('refresh-users').addEventListener('click', function() {
+        fetch('/refresh_users')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('users-table-container').innerHTML = html;
+            });
     });
 });
 </script>

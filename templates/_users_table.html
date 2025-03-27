@@ -25,6 +25,13 @@
                 <button class="btn btn-primary btn-sm btn-update-role" data-user-id="{{ user.id }}">
                     <i class="fas fa-save"></i> Update
                 </button>
+
+                <button class="btn btn-danger btn-sm action-btn delete-user"
+                        data-user-id="{{ user.id }}"
+                        {% if current_user is defined and user.id == current_user %}disabled title="You can't delete yourself"{% endif %}>
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+
             </td>
         </tr>
         {% else %}

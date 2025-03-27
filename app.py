@@ -132,18 +132,6 @@ def get_user_tasks(user_id):
         (user_id,)
     ).fetchall()
 
-# ================== ПОДЗАДАЧИ ==================
-def create_subtask(title, description, task_id, assigned_to):
-    db = get_db()
-    cursor = db.execute(
-        """INSERT INTO subtasks
-        (title, description, task_id, assigned_to, status)
-        VALUES (?, ?, ?, ?, 'pending')""",
-        (title, description, task_id, assigned_to)
-    )
-    db.commit()
-    return cursor.lastrowid
-
 # ================== ЛОГИРОВАНИЕ ==================
 def log_action(user_id, action, details=None):
     db = get_db()
@@ -203,9 +191,15 @@ def logout():
 # ================== ПАНЕЛИ ==================
 def admin_dashboard():
     db = get_db()
-    users = db.execute('SELECT id, username, role FROM users WHERE role = "admin"').fetchall()
-    logs = db.execute('SELECT * FROM logs ORDER BY timestamp DESC LIMIT 10').fetchall()
-    return render_template('admin.html', users=users, logs=logs)
+    users = db.execute('SELECT id, username, role FROM users').fetchall()
+    logs = db.execute('''
+        SELECT l.*, u.username 
+        FROM logs l
+        LEFT JOIN users u ON l.user_id = u.id
+        ORDER BY l.timestamp DESC 
+        LIMIT 10
+    ''').fetchall()
+    return render_template('admin.html', users=users, logs=logs, current_user=session['user_id'])
 
 def manager_dashboard():
     db = get_db()
@@ -386,6 +380,36 @@ def change_role():
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/delete_user/<int:user_id>', methods=['POST'])
+def delete_user(user_id):
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+
+    db = get_db()
+    try:
+        # Проверяем, что пользователь не удаляет сам себя
+        if user_id == session['user_id']:
+            return jsonify({'success': False, 'error': 'Cannot delete yourself'}), 400
+
+        # Удаляем пользователя
+        db.execute('DELETE FROM users WHERE id = ?', (user_id,))
+        db.commit()
+        log_action(session['user_id'], 'user_deleted', f'User {user_id} deleted')
+        return jsonify({'success': True})
+    except sqlite3.Error as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/refresh_users')
+def refresh_users():
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return '', 403
+
+    db = get_db()
+    users = db.execute('SELECT id, username, role FROM users').fetchall()
+    return render_template('_users_table.html', users=users, current_user=session['user_id'])
 
 # Инициализация приложения
 if __name__ == '__main__':
