@@ -201,11 +201,19 @@ def admin_dashboard():
     ''').fetchall()
     return render_template('admin.html', users=users, logs=logs, current_user=session['user_id'])
 
+
 def manager_dashboard():
     db = get_db()
-    projects = get_projects()
+    # Получаем все проекты, а не только созданные текущим менеджером
+    projects = db.execute('''
+        SELECT p.*, u.username as creator_name 
+        FROM projects p
+        JOIN users u ON p.created_by = u.id
+        ORDER BY p.id DESC
+    ''').fetchall()
+
     workers = db.execute('SELECT id, username FROM users WHERE role = "worker"').fetchall()
-    return render_template('manager.html', projects=projects, workers=workers)
+    return render_template('manager.html', projects=projects, workers=workers, current_user=session['user_id'])
 
 def worker_dashboard():
     tasks = get_user_tasks(session['user_id'])
@@ -410,6 +418,41 @@ def refresh_users():
     db = get_db()
     users = db.execute('SELECT id, username, role FROM users').fetchall()
     return render_template('_users_table.html', users=users, current_user=session['user_id'])
+
+@app.route('/delete_project/<int:project_id>', methods=['POST'])
+def delete_project(project_id):
+    if 'user_id' not in session or session.get('role') not in ['admin', 'manager']:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+
+    db = get_db()
+    try:
+        # Проверяем существование проекта
+        project = db.execute('SELECT * FROM projects WHERE id = ?', (project_id,)).fetchone()
+        if not project:
+            return jsonify({'success': False, 'error': 'Project not found'}), 404
+
+        # Удаляем проект
+        db.execute('DELETE FROM projects WHERE id = ?', (project_id,))
+        db.commit()
+        log_action(session['user_id'], 'project_deleted', f'Project {project_id} deleted')
+        return jsonify({'success': True})
+    except sqlite3.Error as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/manager/get_projects')
+def get_manager_projects():
+    if 'user_id' not in session or session.get('role') != 'manager':
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    db = get_db()
+    projects = db.execute('''
+        SELECT p.*, u.username as creator_name 
+        FROM projects p
+        JOIN users u ON p.created_by = u.id
+        ORDER BY p.id DESC
+    ''').fetchall()
+
+    return render_template('projects_table', projects=projects, current_user=session['user_id'])
 
 # Инициализация приложения
 if __name__ == '__main__':
