@@ -4,11 +4,11 @@
 
 {% block content %}
 <div class="dashboard">
-    <h2>Worker Dashboard</h2>
+    <h2>Панель юзера</h2>
 
     <div class="dashboard-grid">
         <div class="dashboard-section">
-            <h3>Your Tasks</h3>
+            <h3>Твои задачи</h3>
             {% if tasks %}
             <div class="task-list">
                 {% for task in tasks %}
@@ -28,40 +28,16 @@
                 {% endfor %}
             </div>
             {% else %}
-            <p>No tasks assigned to you.</p>
+            <p>Задач пока нет</p>
             {% endif %}
         </div>
 
-        <div class="dashboard-section">
-            <h3>Your Subtasks</h3>
-            {% if subtasks %}
-            <div class="task-list">
-                {% for subtask in subtasks %}
-                <div class="task-card {% if subtask['status'] == 'completed' %}completed{% endif %}">
-                    <div class="task-header">
-                        <h4>{{ subtask['title'] }}</h4>
-                        <span class="project-badge">{{ subtask['task_title'] }}</span>
-                    </div>
-                    <p>{{ subtask['description'] }}</p>
-                    <div class="task-footer">
-                        <span class="task-status">{{ subtask['status'] }}</span>
-                        {% if subtask['status'] != 'completed' %}
-                        <button class="btn btn-sm btn-complete-subtask" data-subtask-id="{{ subtask['id'] }}">Mark Complete</button>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <p>No subtasks assigned to you.</p>
-            {% endif %}
-        </div>
+
     </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Обработка завершения задачи
     document.querySelectorAll('.btn-complete-task').forEach(button => {
         button.addEventListener('click', function() {
             const taskId = this.getAttribute('data-task-id');
@@ -81,7 +57,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Обработка завершения подзадачи
     document.querySelectorAll('.btn-complete-subtask').forEach(button => {
         button.addEventListener('click', function() {
             const subtaskId = this.getAttribute('data-subtask-id');

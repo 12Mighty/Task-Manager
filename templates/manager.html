@@ -4,46 +4,44 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4">Manager Dashboard</h2>
+    <h2 class="mb-4">Панель менеджера</h2>
     <div id="loading-indicator" class="text-center mb-3" style="display: none;">
         <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
+            <span class="visually-hidden">Загрузка...</span>
         </div>
     </div>
 
-    <!-- Projects Section -->
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5>Create New Project</h5>
+            <h5>Создать новый проект</h5>
         </div>
         <div class="card-body">
             <form id="create-project-form">
                 <div class="mb-3">
-                    <label for="project-name" class="form-label">Project Name*</label>
+                    <label for="project-name" class="form-label">Имя проекта*</label>
                     <input type="text" class="form-control" id="project-name" name="name" required>
                 </div>
                 <div class="mb-3">
-                    <label for="project-description" class="form-label">Description</label>
+                    <label for="project-description" class="form-label">Описание</label>
                     <textarea class="form-control" id="project-description" name="description" rows="2"></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Create Project
+                    <i class="fas fa-plus"></i> Создать проект
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- Projects List -->
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5>Your Projects</h5>
+            <h5>Проекты</h5>
             <button id="refresh-projects" class="btn btn-sm btn-outline-secondary">
-                <i class="fas fa-sync"></i> Refresh
+                <i class="fas fa-sync"></i> Обновить
             </button>
         </div>
         <div class="card-body">
             <div id="projects-list">
-                <div class="text-center text-muted">Loading projects...</div>
+                <div class="text-center text-muted">Загрузка проектов...</div>
             </div>
         </div>
     </div>
@@ -51,40 +49,40 @@
     <!-- Task Creation -->
     <div class="card">
         <div class="card-header">
-            <h5>Create New Task</h5>
+            <h5>Создать задачу</h5>
         </div>
         <div class="card-body">
             <form id="create-task-form">
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="task-title" class="form-label">Task Title*</label>
+                        <label for="task-title" class="form-label">Имя задачи*</label>
                         <input type="text" class="form-control" id="task-title" name="title" required>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label for="task-project" class="form-label">Project*</label>
+                        <label for="task-project" class="form-label">Проект*</label>
                         <select class="form-select" id="task-project" name="project_id" required>
-                            <option value="" disabled selected>Loading projects...</option>
+                            <option value="" disabled selected>Загрузка проектов...</option>
                         </select>
                     </div>
                 </div>
                 <div class="mb-3">
-                    <label for="task-description" class="form-label">Description</label>
+                    <label for="task-description" class="form-label">Описание</label>
                     <textarea class="form-control" id="task-description" name="description" rows="2"></textarea>
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="task-assignee" class="form-label">Assign to Worker*</label>
+                        <label for="task-assignee" class="form-label">Юзер*</label>
                         <select class="form-select" id="task-assignee" name="assigned_to" required>
-                            <option value="" disabled selected>Loading workers...</option>
+                            <option value="" disabled selected>Загрузка юзеров...</option>
                         </select>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Status</label>
-                        <div class="form-control bg-light">Pending</div>
+                        <label class="form-label">Статус</label>
+                        <div class="form-control bg-light">Ожидаемый</div>
                     </div>
                 </div>
                 <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-tasks"></i> Create Task
+                    <i class="fas fa-tasks"></i> Создать задачу
                 </button>
             </form>
         </div>
@@ -93,15 +91,12 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Load initial data
     loadInitialData();
 
-    // Refresh projects button
     document.getElementById('refresh-projects').addEventListener('click', function() {
         loadWithIndicator(refreshProjects);
     });
 
-    // Project form submission
     document.getElementById('create-project-form').addEventListener('submit', async function(e) {
         e.preventDefault();
         await loadWithIndicator(async () => {
@@ -126,7 +121,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Task form submission
     document.getElementById('create-task-form').addEventListener('submit', async function(e) {
         e.preventDefault();
         await loadWithIndicator(async () => {
@@ -150,7 +144,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Добавим обработчик удаления проектов
     document.getElementById('projects-list').addEventListener('click', async function(e) {
         if (e.target.closest('.delete-project')) {
             const button = e.target.closest('.delete-project');
@@ -182,7 +175,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Helper functions
     async function loadInitialData() {
         await loadWithIndicator(async () => {
             await Promise.all([refreshProjects(), refreshWorkers()]);
@@ -196,7 +188,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const html = await response.text();
             document.getElementById('projects-list').innerHTML = html;
 
-            // Обновляем select для создания задач
             const selectResponse = await fetch('/manager/get_projects_select');
             if (!selectResponse.ok) throw new Error('Failed to load projects');
             const projects = await selectResponse.json();

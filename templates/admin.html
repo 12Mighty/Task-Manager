@@ -4,22 +4,21 @@
 
 {% block content %}
 <div class="dashboard">
-    <h2>Admin Dashboard</h2>
+    <h2>Панель админа</h2>
 
-    <!-- Добавим кнопку для обновления списка -->
     <button id="refresh-users" class="btn btn-secondary mb-3">
-        <i class="fas fa-sync-alt"></i> Refresh Users
+        <i class="fas fa-sync-alt"></i> Обновить
     </button>
 
     <div class="dashboard-section">
-        <h3>User Management</h3>
+        <h3>Юзеры</h3>
         <div id="users-table-container">
             {% include '_users_table.html' %}
         </div>
     </div>
 
     <div class="dashboard-section">
-        <h3>Recent Activity</h3>
+        <h3>Недавние действия</h3>
         <div class="activity-log">
             {% for log in logs %}
             <div class="log-entry">
@@ -29,7 +28,7 @@
                 <span class="log-details">{{ log.details }}</span>
             </div>
             {% else %}
-            <p>No activity logs found</p>
+            <p>Нет активности</p>
             {% endfor %}
         </div>
     </div>

@@ -21,7 +21,7 @@
                     <button class="btn btn-sm btn-danger delete-project"
                             data-project-id="{{ project.id }}"
                             {% if project.created_by == current_user %}title="Delete Project"{% else %}title="Only creator can delete" disabled{% endif %}>
-                        <i class="fas fa-trash"></i> Delete
+                        <i class="fas fa-trash"></i> Удалить
                     </button>
                 </td>
             </tr>
@@ -31,6 +31,6 @@
 </div>
 {% else %}
 <div class="alert alert-info">
-    No projects found. Create your first project above.
+    Проектоа пока нет. Создайте новые проекты.
 </div>
 {% endif %}

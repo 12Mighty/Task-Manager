@@ -17,8 +17,8 @@
             </div>
             <nav>
                 {% if 'user_id' in session %}
-                    <span>Welcome, {{ session['username'] }} ({{ session['role'] }})</span>
-                    <a href="{{ url_for('logout') }}">Logout</a>
+                    <span>Добро пожаловать, {{ session['username'] }} ({{ session['role'] }})</span>
+                    <a href="{{ url_for('logout') }}">Выйти</a>
                     <a href="#" id="notifications-btn">
                         <i class="fas fa-bell"></i>
                         <span id="notification-count"></span>
@@ -28,9 +28,8 @@
         </header>
 
         <div class="notifications-panel" id="notifications-panel">
-            <h3>Notifications</h3>
+            <h3>Уведомления</h3>
             <div class="notifications-list" id="notifications-list">
-                <!-- Notifications will be loaded here -->
             </div>
         </div>
 
@@ -47,7 +46,7 @@
         </main>
 
         <footer>
-            <p>&copy; 2023 Task Manager. All rights reserved.</p>
+            <p>&copy; 2025 Task Manager. Все права наши.</p>
         </footer>
     </div>
 

@@ -2,10 +2,10 @@
     <thead>
         <tr>
             <th>ID</th>
-            <th>Username</th>
-            <th>Current Role</th>
-            <th>Change Role</th>
-            <th>Actions</th>
+            <th>Имя</th>
+            <th>Роль</th>
+            <th>Изменить роль</th>
+            <th>Действие</th>
         </tr>
     </thead>
     <tbody>
@@ -16,14 +16,14 @@
             <td class="current-role">{{ user.role }}</td>
             <td>
                 <select class="form-select role-select">
-                    <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
-                    <option value="manager" {% if user.role == 'manager' %}selected{% endif %}>Manager</option>
-                    <option value="worker" {% if user.role == 'worker' %}selected{% endif %}>Worker</option>
+                    <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Админ</option>
+                    <option value="manager" {% if user.role == 'manager' %}selected{% endif %}>Менеджер</option>
+                    <option value="worker" {% if user.role == 'worker' %}selected{% endif %}>Воркер</option>
                 </select>
             </td>
             <td>
                 <button class="btn btn-primary btn-sm btn-update-role" data-user-id="{{ user.id }}">
-                    <i class="fas fa-save"></i> Update
+                    <i class="fas fa-save"></i> Обновить
                 </button>
 
                 <button class="btn btn-danger btn-sm action-btn delete-user"
@@ -36,7 +36,7 @@
         </tr>
         {% else %}
         <tr>
-            <td colspan="5">No users found</td>
+            <td colspan="5">Юзеры не найдены</td>
         </tr>
         {% endfor %}
     </tbody>
