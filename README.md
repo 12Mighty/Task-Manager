@@ -168,3 +168,10 @@ flask init-db
 2. Создайте новую ветку.
 3. Внесите свои изменения.
 4. Отправьте пулл-реквест.
+
+---
+#### Планы на будущий дизайн
+![photo_2025-03-28_14-54-29](https://github.com/user-attachments/assets/f01a1882-4ee8-41ff-85f0-570357a14557)
+![photo_2025-03-28_14-54-20](https://github.com/user-attachments/assets/14fa0a0d-c458-438a-a57d-76326927de8a)
+
+
